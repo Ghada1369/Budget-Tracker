@@ -42,7 +42,7 @@ class ActivityContainer extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.all(20.0),
             child: Column(
-              mainAxisSize: MainAxisSize.min, // أهم حاجة تمنع overflow
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
                   children: [

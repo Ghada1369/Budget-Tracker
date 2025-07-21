@@ -3,6 +3,8 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:budget_tracker/models/expenses_model.dart';
 import 'package:intl/intl.dart';
 
+import '../widgets/buttom_sheet_content.dart';
+
 class HistoryView extends StatelessWidget {
   static const routeName = 'historyScreen';
 
@@ -62,6 +64,21 @@ class HistoryView extends StatelessWidget {
                 ),
                 children: expenses.map((e) {
                   return ListTile(
+                    leading: IconButton(
+                      icon: const Icon(Icons.edit, size: 20),
+                      onPressed: () {
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) {
+                            return ButtomSheetContent(
+                              existingExpense: e,
+                              expenseKey: e.key,
+                            );
+                          },
+                        );
+                      },
+                    ),
                     title: Text(
                       e.category,
                       style: textTheme.bodyMedium?.copyWith(
