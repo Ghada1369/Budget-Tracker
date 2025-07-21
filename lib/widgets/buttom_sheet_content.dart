@@ -4,9 +4,13 @@ import 'package:budget_tracker/widgets/category_selector.dart';
 import 'package:budget_tracker/widgets/expenses_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hive/hive.dart';
 
 class ButtomSheetContent extends StatefulWidget {
-  const ButtomSheetContent({super.key});
+  final ExpensesModel? existingExpense;
+  final int? expenseKey;
+
+  const ButtomSheetContent({super.key, this.existingExpense, this.expenseKey});
 
   @override
   State<ButtomSheetContent> createState() => _ButtomSheetContentState();
@@ -16,6 +20,15 @@ class _ButtomSheetContentState extends State<ButtomSheetContent> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? savedExpense;
   String? selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.existingExpense != null) {
+      selectedCategory = widget.existingExpense!.category;
+      savedExpense = widget.existingExpense!.expense.toString();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,19 +87,24 @@ class _ButtomSheetContentState extends State<ButtomSheetContent> {
                     if (_formKey.currentState!.validate()) {
                       _formKey.currentState!.save();
 
-                      final expenseModel = ExpensesModel(
+                      final updatedExpense = ExpensesModel(
                         category: selectedCategory!,
                         expense: double.parse(savedExpense!),
                         date: DateTime.now(),
                       );
 
-                      BlocProvider.of<AddExpenseCubit>(context)
-                          .addNote(expenseModel)
-                          .then((_) {
-                        Navigator.pop(context);
-                      });
+                      if (widget.existingExpense != null && widget.expenseKey != null) {
+                        Hive.box<ExpensesModel>('BudgetTracker')
+                            .put(widget.expenseKey!, updatedExpense);
+                      } else {
+                        BlocProvider.of<AddExpenseCubit>(context)
+                            .addNote(updatedExpense);
+                      }
+
+                      Navigator.pop(context);
                     }
                   },
+
                   child: Text(
                     'Ok',
                     style: TextStyle(
